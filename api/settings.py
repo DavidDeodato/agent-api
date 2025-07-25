@@ -30,6 +30,10 @@ class ApiSettings(BaseSettings):
         valid_cors.append("http://localhost")
         # Add localhost:3000 to cors to allow requests from local Agent UI.
         valid_cors.append("http://localhost:3000")
+        # Add localhost:3001 to cors to allow requests from Pepper Law frontend.
+        valid_cors.append("http://localhost:3001")
+        # Add localhost:8080 to cors to allow requests from Vite dev server.
+        valid_cors.append("http://localhost:8080")
 
         return valid_cors
 

@@ -5,13 +5,23 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from db.url import get_db_url
 
-# Create SQLAlchemy Engine using a database URL
-db_url: str = get_db_url()
-db_engine: Engine = create_engine(db_url, pool_pre_ping=True)
+# Função para obter a URL do banco de dados dinamicamente
+def get_engine() -> Engine:
+    # Obter a URL do banco de dados no momento da chamada
+    db_url: str = get_db_url()
+    # Criar e retornar o engine com configurações otimizadas para Supabase
+    return create_engine(
+        db_url, 
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+        pool_timeout=30,
+        pool_recycle=3600,
+        echo=False
+    )
 
-# Create a SessionLocal class
-SessionLocal: sessionmaker[Session] = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-
+# Engine será criado dinamicamente quando necessário
+# Removido db_url global para evitar cache de valor antigo
 
 def get_db() -> Generator[Session, None, None]:
     """
@@ -20,6 +30,9 @@ def get_db() -> Generator[Session, None, None]:
     Yields:
         Session: An SQLAlchemy database session.
     """
+    # Criar engine dinamicamente para cada sessão
+    engine = get_engine()
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db: Session = SessionLocal()
     try:
         yield db
